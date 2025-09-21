@@ -1,0 +1,109 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "uniqueSuffix": {
+      "type": "string",
+      "metadata": {
+        "description": "A unique suffix to append to resource names."
+      },
+      "minLength": 3,
+      "maxLength": 10
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "[concat('omnicorpsa', parameters('uniqueSuffix'))]",
+      "metadata": {
+        "description": "Name of the storage account."
+      }
+    },
+    "functionAppName": {
+      "type": "string",
+      "defaultValue": "[concat('omnicorpfunc', parameters('uniqueSuffix'))]",
+      "metadata": {
+        "description": "Name of the function app."
+      }
+    }
+  },
+  "variables": {
+    "skuStorage": "Standard_LRS",
+    "kindStorage": "StorageV2",
+    "functionAppPlanName": "[concat(parameters('functionAppName'), '-plan')]",
+    "pythonVersion": "~3.12"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-09-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('skuStorage')]"
+      },
+      "kind": "[variables('kindStorage')]",
+      "properties": {
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-03-01",
+      "name": "[variables('functionAppPlanName')]",
+      "location": "[parameters('location')]",
+      "kind": "Linux",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      },
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('functionAppPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionAppPlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "[concat('Python|', variables('pythonVersion'))]",
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "python"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-09-01').keys[0].value, ';EndpointSuffix=', environment().suffixes.storage)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(parameters('functionAppName'))]"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
