@@ -526,7 +526,7 @@ Cognitive skills transform basic book metadata into intelligent, enriched conten
 17. Go back to JSON edit page and  replace the default content with this complete skillset configuration: 
     
    ``` json
-  {
+  
      {
      "name": "books-intelligence-skillset",
      "description": "Comprehensive AI analysis for book catalog",
@@ -749,9 +749,9 @@ Cognitive skills transform basic book metadata into intelligent, enriched conten
   "@odata.etag": "\"0x8DDF6D5BAB0AF67\"",
   "name": "indexer3",
   "description": null,
-  "dataSourceName": "omnicorp-books-review2",
-  "skillsetName": "books-intelligence-skillset-complete",
-  "targetIndexName": "books-reviews-index3",
+  "dataSourceName": "omnicorp-books-review",
+  "skillsetName": "books-intelligence-skillset",
+  "targetIndexName": "books-reviews-index",
   "disabled": null,
   "schedule": null,
   "parameters": {
@@ -786,7 +786,6 @@ Cognitive skills transform basic book metadata into intelligent, enriched conten
     }
   ],
   "cache": {
-    "id": "5f443f36-a831-4ad9-a755-32b604e7fee5",
     "enableReprocessing": true,
     "storageConnectionString": "<redacted>",
     "identity": null
@@ -823,4 +822,7 @@ Cognitive skills transform basic book metadata into intelligent, enriched conten
    
    ![56](./assets/Screenshot18.png)
 
+
+
+    **More often you  may see `Partial Success` with multiple warnings and errors. It is ok to ignore this since we didn't perform any data clensing pre-processing part**.
 ---

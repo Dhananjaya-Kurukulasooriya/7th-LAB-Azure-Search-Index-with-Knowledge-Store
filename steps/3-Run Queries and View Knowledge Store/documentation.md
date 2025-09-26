@@ -5,56 +5,129 @@ Testing proves the search solution works as intended and demonstrates the capabi
 
 1. Navigate to **Search explorer** in your Azure AI Search service:
    
-   ![58](./assets/Screenshot58.png)
+   ![01](./assets/Screenshot01.png)
 
-2. Select the **books-reviews-index3**:
+2. Select the **books-reviews-index**:
    
-   ![59](./assets/Screenshot59.png)
+   ![02](./assets/Screenshot02.png)
 
-3. Test comprehensive book discovery queries:
+3. Set the `View` to `{ } JSON view`:
+
+   ![03](./assets/Screenshot03.png)
+
+4. Test comprehensive book discovery queries:
 
    **Query 1: Verify all books are indexed**
-```json
-   {
-     "search": "*",
-     "count": true,
-     "top": 0
-   }
+   ```json
+      {
+      "search": "*",
+      "count": true,
+      "top": 0
+      }
 
-```
+   ```
+
+   output :
+   ```json
+      {
+   "@odata.context": "https://omnicorp-knowledgestore-john.search.windows.net/indexes('books-reviews-index')/$metadata#docs(*)",
+   "@odata.count": 9999,
+   "value": []
+   }
+   ```
+
    **Query 2: Test book discovery by title:**
-```json
-   {
-     "search": "Harry Potter",
-     "select": "title,authors,average_rating,ratings_count",
-     "highlight": "title,authors",
-     "top": 5
-   }
+   ```json
+      {
+      "search": "Harry Potter",
+      "select": "title,authors,average_rating,ratings_count",
+      "highlight": "title,authors",
+      "top": 5
+      }
 
-```
+   ```
+   output:
+   ```json
+      "value": [
+    {
+      "@search.score": 29.482872,
+      "@search.highlights": {
+        "title": [
+          "<em>Harry</em> <em>Potter</em> Collection (<em>Harry</em> <em>Potter</em>, #1-6)"
+        ]
+      },
+      "authors": "J.K. Rowling",
+      "title": "Harry Potter Collection (Harry Potter, #1-6)",
+      "average_rating": 4.73,
+      "ratings_count": 24618
+    },
+    {...
+   ```
+
    **Query 3: High-rated books analysis:**
-```json
+   ```json
+      {
+      "search": "*",
+      "filter": "average_rating ge 4.5 and ratings_count ge 10000",
+      "select": "title,authors,average_rating,ratings_count,original_publication_year",
+      "orderby": "ratings_count desc",
+      "top": 20
+      }
+
+   ```
+   output:
+   ```json
+   {
+      "@search.score": 1,
+      "authors": "J.K. Rowling, Mary GrandPré, Rufus Beck",
+      "original_publication_year": "1999",
+      "title": "Harry Potter and the Prisoner of Azkaban (Harry Potter, #3)",
+      "average_rating": 4.53,
+      "ratings_count": 1832823
+    },
     {
-     "search": "*",
-     "filter": "average_rating ge 4.5 and ratings_count ge 10000",
-     "select": "title,authors,average_rating,ratings_count,original_publication_year",
-     "orderby": "ratings_count desc",
-     "top": 20
+      "@search.score": 1,
+      "authors": "J.K. Rowling, Mary GrandPré",
+      "original_publication_year": "2000",
+      "title": "Harry Potter and the Goblet of Fire (Harry Potter, #4)",
+      "average_rating": 4.53,
+      "ratings_count": 1753043
+    },
+    {...
+   ```
+
+   **Query 4: Author popularity with faceting:**
+
+   ```json
+   {
+      "search": "*",
+      "facets": ["authors,count:20", "original_publication_year,count:20"],
+      "filter": "ratings_count ge 1000",
+      "top": 10
    }
+   ```
+   output:
 
- ```
+   ```json
 
- **Query 4: Author popularity with faceting:**
- ```json
-    {
-     "search": "*",
-     "facets": ["authors,count:20", "original_publication_year,interval:10"],
-     "filter": "ratings_count ge 1000",
-     "top": 10
-    }
- ```
+         "authors": [
+         {
+         "value": "Nora Roberts",
+         "count": 56
+         },
+         {
+         "value": "Stephen King",
+         "count": 56
+         },
+         {
+         "value": "Dean Koontz",
+         "count": 45
+         },
+         {...
 
-***Verify search results show proper book data and faceting works correctly:***
+   ```
+
+   ***Verify search results show proper book data and faceting works correctly:***
 
 
 ## View the Knowledge Store Data

@@ -18,7 +18,7 @@
       "name": "[parameters('policyName')]",
       "properties": {
         "displayName": "Allow only Lab Resources with Specific Configurations",
-        "description": "This policy allows only Azure AI Search (Basic tier in East US), Storage Accounts (East US), and Azure Functions (Consumption tier in East US) to be created. All other resources are denied.",
+        "description": "This policy allows only Azure AI Search (Basic tier in East US), Storage Accounts (East US), and Azure AI Services multi-service account (East US) to be created. All other resources are denied.",
         "mode": "All",
         "metadata": {
           "category": "Resource Governance",
@@ -64,11 +64,7 @@
                 "allOf": [
                   {
                     "field": "type",
-                    "equals": "Microsoft.Web/sites"
-                  },
-                  {
-                    "field": "kind",
-                    "like": "functionapp*"
+                    "equals": "Microsoft.CognitiveServices/accounts"
                   },
                   {
                     "field": "location",
@@ -77,32 +73,11 @@
                 ]
               },
               {
-                "allOf": [
-                  {
-                    "field": "type",
-                    "equals": "Microsoft.Web/serverfarms"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "location",
-                        "notEquals": "eastus"
-                      },
-                      {
-                        "field": "Microsoft.Web/serverfarms/sku.tier",
-                        "notEquals": "Dynamic"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
                 "field": "type",
                 "notIn": [
                   "Microsoft.Search/searchServices",
                   "Microsoft.Storage/storageAccounts",
-                  "Microsoft.Web/sites",
-                  "Microsoft.Web/serverfarms",
+                  "Microsoft.CognitiveServices/accounts",
                   "Microsoft.Resources/resourceGroups",
                   "Microsoft.Resources/deployments",
                   "Microsoft.Authorization/roleAssignments",

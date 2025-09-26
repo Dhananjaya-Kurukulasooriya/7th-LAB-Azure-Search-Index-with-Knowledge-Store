@@ -1,1 +1,0 @@
-Azure Search Index with custom skill
